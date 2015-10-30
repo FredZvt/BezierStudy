@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [ExecuteInEditMode]
-public class BezierCurve : MonoBehaviour
+public class BezierCurveTest : MonoBehaviour
 {
     [Header("Control Points")]
     public Transform start;
@@ -45,13 +45,13 @@ public class BezierCurve : MonoBehaviour
     public Vector3? lastEndPosition;
     public Vector3? lastEndControlPointPosition;
 
-    private Bezier.PathPoint[] path;
+    private Bezier.CurvePoint[] path;
 
     private void Update()
     {
         if (AllTransformsWereBinded() && (LastPositionsWereNotInitialized() || OneOfTheTransformsHasChangedPositionSinceLastLoop()))
         {
-            path = Bezier.GetBezierCurve(start.position, startControlPoint.position, end.position, endControlPoint.position, (byte)resolution);
+            path = Bezier.GetPointsInCurve(start.position, startControlPoint.position, end.position, endControlPoint.position, (byte)resolution);
         }
     }
 
@@ -74,23 +74,23 @@ public class BezierCurve : MonoBehaviour
                 {
                     Gizmos.color = curveColor;
                     if (i > 0 && drawCurve)
-                        Gizmos.DrawLine(lastPoint.point, path[i].point);
+                        Gizmos.DrawLine(lastPoint.position, path[i].position);
 
                     Gizmos.color = pointsColor;
                     if (drawPoints)
-                        Gizmos.DrawWireSphere(path[i].point, drawPointRadius);
+                        Gizmos.DrawWireSphere(path[i].position, drawPointRadius);
 
                     Gizmos.color = tangentsColor;
                     if (drawTangents)
-                        Gizmos.DrawLine(path[i].point, path[i].point + (path[i].tangent * drawTangentsSize));
+                        Gizmos.DrawLine(path[i].position, path[i].position + (path[i].tangent * drawTangentsSize));
 
                     Gizmos.color = normalsColor;
                     if (drawNormals)
-                        Gizmos.DrawLine(path[i].point, path[i].point + (path[i].normal * drawNormalsSize));
+                        Gizmos.DrawLine(path[i].position, path[i].position + (path[i].normal * drawNormalsSize));
 
                     Gizmos.color = binormalsColor;
                     if (drawBinormals)
-                        Gizmos.DrawLine(path[i].point, path[i].point + (path[i].binormal * drawBinormalsSize));
+                        Gizmos.DrawLine(path[i].position, path[i].position + (path[i].binormal * drawBinormalsSize));
 
                     lastPoint = path[i];
                 }
