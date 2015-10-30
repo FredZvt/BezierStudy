@@ -15,10 +15,9 @@ public class RandomBezierPathTest : MonoBehaviour
     public float rndPathVertRange = 4f;
     public float rndCtrlPointsHorRange = 1f;
     public float rndCtrlPointsVertRange = 1f;
+    public bool parallelStartAndExit = true;
 
     [Header("Debug Settings")]
-    public bool drawHandles = true;
-    public Color handleColor = Color.gray;
     public bool drawCurve = true;
     public Color curveColor = Color.white;
     public bool drawPoints = true;
@@ -38,13 +37,16 @@ public class RandomBezierPathTest : MonoBehaviour
     public float drawBinormalsSize = .2f;
     public Color binormalsColor = Color.red;
 
-    private RandomBezierPath path;
+    private Bezier.PathPoint[] path;
+    private Vector3 lastOrigin = Vector3.zero;
+    private Vector3 lastDestination = Vector3.zero;
     private int lastParts = 0;
     private int lastResolution = 0;
     private float lastRndPathHorRange = 0;
     private float lastRndPathVertRange = 0;
     private float lastRndCtrlPointsHorRange = 0;
     private float lastRndCtrlPointsVertRange = 0;
+    private bool lastParallelStartAndExit = false;
 
     private void Start()
     {
@@ -57,69 +59,74 @@ public class RandomBezierPathTest : MonoBehaviour
 
     private void Update()
     {
-        if (lastParts != parts ||
-            lastResolution != resolution ||
-            lastRndPathHorRange != rndPathHorRange ||
-            lastRndPathVertRange != rndPathVertRange ||
-            lastRndCtrlPointsHorRange != rndCtrlPointsHorRange ||
-            lastRndCtrlPointsVertRange != rndCtrlPointsVertRange)
+        if (origin != null && destination != null)
         {
-            path = new RandomBezierPath(
-                    origin.position, destination.position,
-                    parts, resolution,
-                    rndPathHorRange, rndPathVertRange,
-                    rndCtrlPointsHorRange, rndCtrlPointsVertRange
-                   );
+            if (lastOrigin != origin.position ||
+                lastDestination != destination.position ||
+                lastParts != parts ||
+                lastResolution != resolution ||
+                lastRndPathHorRange != rndPathHorRange ||
+                lastRndPathVertRange != rndPathVertRange ||
+                lastRndCtrlPointsHorRange != rndCtrlPointsHorRange ||
+                lastRndCtrlPointsVertRange != rndCtrlPointsVertRange ||
+                lastParallelStartAndExit != parallelStartAndExit)
+            {
+                lastOrigin = origin.position;
+                lastDestination = destination.position;
+                lastParts = parts;
+                lastResolution = resolution;
+                lastRndPathHorRange = rndPathHorRange;
+                lastRndPathVertRange = rndPathVertRange;
+                lastRndCtrlPointsHorRange = rndCtrlPointsHorRange;
+                lastRndCtrlPointsVertRange = rndCtrlPointsVertRange;
+                lastParallelStartAndExit = parallelStartAndExit;
+
+                path = Bezier.GetRandomPath(
+                        origin.position, destination.position,
+                        parts, resolution,
+                        rndPathHorRange, rndPathVertRange,
+                        rndCtrlPointsHorRange, rndCtrlPointsVertRange,
+                        parallelStartAndExit
+                       );
+            }
+        }
+        else
+        {
+            path = null;
         }
     }
 
     private void OnDrawGizmos()
     {
-        if (path != null && path.pathKeyPoints != null)
+        if (origin != null && destination != null && path != null)
         {
-            if (drawHandles)
-            {
-                for (var i = 0; i < parts; i++)
-                {
-                    Gizmos.color = handleColor;
-
-                    Gizmos.DrawWireSphere(path.pathKeyPoints[i], 0.5f);
-                    Gizmos.DrawWireSphere(path.pathKeyPoints[i + 1], 0.5f);
-
-                    Gizmos.DrawLine(path.pathKeyPoints[i], path.controlPoints[i][1]);
-                    Gizmos.DrawLine(path.pathKeyPoints[i + 1], path.controlPoints[i][2]);
-                    Gizmos.DrawWireSphere(path.controlPoints[i][1], 0.1f);
-                    Gizmos.DrawWireSphere(path.controlPoints[i][2], 0.1f);
-                }
-            }
-
             if (drawCurve || drawPoints || drawTangents || drawNormals || drawBinormals)
             {
-                var lastPoint = path.pathPoints[0];
+                var lastPoint = path[0];
 
-                for (var i = 0; i < path.pathPoints.Length; i++)
+                for (var i = 0; i < path.Length; i++)
                 {
                     Gizmos.color = curveColor;
                     if (i > 0 && drawCurve)
-                        Gizmos.DrawLine(lastPoint.point, path.pathPoints[i].point);
+                        Gizmos.DrawLine(lastPoint.point, path[i].point);
 
                     Gizmos.color = pointsColor;
                     if (drawPoints)
-                        Gizmos.DrawWireSphere(path.pathPoints[i].point, drawPointRadius);
+                        Gizmos.DrawWireSphere(path[i].point, drawPointRadius);
 
                     Gizmos.color = tangentsColor;
                     if (drawTangents)
-                        Gizmos.DrawLine(path.pathPoints[i].point, path.pathPoints[i].point + (path.pathPoints[i].tangent * drawTangentsSize));
+                        Gizmos.DrawLine(path[i].point, path[i].point + (path[i].tangent * drawTangentsSize));
 
                     Gizmos.color = normalsColor;
                     if (drawNormals)
-                        Gizmos.DrawLine(path.pathPoints[i].point, path.pathPoints[i].point + (path.pathPoints[i].normal * drawNormalsSize));
+                        Gizmos.DrawLine(path[i].point, path[i].point + (path[i].normal * drawNormalsSize));
 
                     Gizmos.color = binormalsColor;
                     if (drawBinormals)
-                        Gizmos.DrawLine(path.pathPoints[i].point, path.pathPoints[i].point + (path.pathPoints[i].binormal * drawBinormalsSize));
+                        Gizmos.DrawLine(path[i].point, path[i].point + (path[i].binormal * drawBinormalsSize));
 
-                    lastPoint = path.pathPoints[i];
+                    lastPoint = path[i];
                 }
             }
         }
