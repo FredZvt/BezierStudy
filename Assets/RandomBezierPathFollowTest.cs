@@ -85,6 +85,9 @@ public class RandomBezierPathFollowTest : MonoBehaviour
         var curveIdx = (int)currPos;
         var timeInCurve = currPos - curveIdx;
 
+        Debug.LogFormat("curveIdx: {0}", curveIdx);
+        Debug.LogFormat("timeInCurve: {0}", timeInCurve);
+
         var reset = false;
         if (curveIdx > curves.Length - 1)
         {

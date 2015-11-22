@@ -253,13 +253,13 @@ public static class Bezier
                 Gizmos.DrawWireSphere(curves[i].end, handlesRadius);
             }
         }
-
+        
         if (path != null)
         {
             if (drawCurve || drawPoints || drawTangents || drawNormals || drawBinormals)
             {
                 var lastPoint = path[0];
-
+                
                 for (var i = 0; i < path.Length; i++)
                 {
                     Gizmos.color = curveColor.Value;
@@ -278,9 +278,14 @@ public static class Bezier
                     if (drawNormals)
                         Gizmos.DrawLine(path[i].position, path[i].position + (path[i].normal * normalsSize));
 
+                    var distBetweenThisPointAndLastTangent = (path[i].position - (lastPoint.position + (lastPoint.tangent * tangentsSize))).magnitude;
+
                     Gizmos.color = binormalsColor.Value;
                     if (drawBinormals)
-                        Gizmos.DrawLine(path[i].position, path[i].position + (path[i].binormal * binormalsSize));
+                    {
+
+                        Gizmos.DrawLine(path[i].position, path[i].position + (path[i].binormal * binormalsSize * distBetweenThisPointAndLastTangent));
+                    }
 
                     lastPoint = path[i];
                 }
