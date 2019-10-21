@@ -11,7 +11,6 @@ public class Gen : MonoBehaviour
     public int chunksOnARow = 5; 
 
     [NonSerialized] private float chunkSize = 4f;
-    [NonSerialized] private float halfChunkSize;
     [NonSerialized] private int middleColumnIndex;
     [NonSerialized] private int lastUpdatePositionIndex;
     [NonSerialized] private TerrainChunk[,] chunks;
@@ -25,7 +24,6 @@ public class Gen : MonoBehaviour
 
     private void Start()
     {
-        halfChunkSize = chunkSize * 0.5f;
         lastUpdatePositionIndex = GetPositionIndex();
         nextRowToPull = 0;
 
@@ -47,8 +45,6 @@ public class Gen : MonoBehaviour
                 chunks[row, col] = newChunk;
             }
         }
-        
-        Debug.Log($"lastUpdatePositionIndex: {lastUpdatePositionIndex}");
     }
 
     private void Update()
@@ -61,7 +57,8 @@ public class Gen : MonoBehaviour
                 var chunk = chunks[nextRowToPull, col];
                 chunk.transform.position = new Vector3(
                     (col - middleColumnIndex) * chunkSize,
-                    0,(currPositionIndex + 1) * chunkSize
+                    0,
+					(currPositionIndex + chunksRows - 1) * chunkSize
                 );
             }
             
@@ -70,12 +67,11 @@ public class Gen : MonoBehaviour
                 nextRowToPull = 0;
             
             lastUpdatePositionIndex = currPositionIndex;
-            Debug.Log($"lastUpdatePositionIndex: {lastUpdatePositionIndex}"); 
         }
     }
 
     private int GetPositionIndex()
     {
-        return Mathf.CeilToInt((playerPos.position.z - halfChunkSize) / chunkSize);
+        return Mathf.FloorToInt(playerPos.position.z / chunkSize);
     }
 }

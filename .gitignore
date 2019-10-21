@@ -37,3 +37,4 @@ Exceptions
 #Everything inside Assets and Workbench folders must be on the repo.
 !Assets/**
 !Workbench/**
+.vs/
